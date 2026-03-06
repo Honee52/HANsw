@@ -1,7 +1,7 @@
 HANsw - versiohistoria.
 =========================
 Versio:     0.0.2 Build 0, beta-versio
-Pvm:        05.06.2026
+Pvm:        05.03.2026
 Lisätty:   	Tehokäyrän näyttö.
 			- Jänniteskaalaus 1kW/jako, 2kW/jako, 5kW/jako ja 10kW/jako.
 			- Aikaskaala 5 minuuttia/jako.
@@ -11,4 +11,5 @@ Muutettu:	Asetusten syöttö.
 			
 Versio:     0.0.1 Build 0, beta-versio
 Pvm:        25.02.2026
+
 Tila:   	Ohjelman ensimmäinen versio.
