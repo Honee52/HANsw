@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sähkömittari -> HAN</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #dee2e6; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        h2, h3 { margin-top: 0; color: #0056b3; font-size: 1.2em; }
+        #status { font-weight: bold; color: #6c757d; font-size: 0.9em; }
+        .chart-history { height: 350px; }
+        .chart-small { height: 200px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card header">
+		<h2>
+			<img src="td-logo.jpg" alt="Icon" style="height: 3em; vertical-align: middle;">
+			Sähkömittarin lukija (HANhtml)
+		</h2>
+        <div id="status">Alustetaan yhteyttä...</div>
+    </div>
+
+    <div class="card">
+        <h3>Kokonaiskuorma (W) - 2 tunnin historia (jako 10 minuuttia)</h3>
+        <div class="chart-history">
+            <canvas id="historyChart"></canvas>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Tehot (W)</h3>
+            <div class="chart-small">
+                <canvas id="powerBarChart"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Virrat (A)</h3>
+            <div class="chart-small">
+                <canvas id="currentBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+	//=========================================================================
+	// Anna HAN-laitteen URL (= IP-osoite) tähän:
+    const API_URL = 'http://192.168.68.112/meter/'; 
+	//=========================================================================	
+	
+	// Asetuksia
+    const MAX_POINTS = 720; // 2 tuntia (10s välein)
+    const GRID_STEP = 60;   // 10 minuuttia (60 * 10s = 600s)
+
+    // Alustetaan taulukot valmiiksi, jotta näkymä ei veny
+    let historyLabels = new Array(MAX_POINTS).fill('');
+    let historyData = new Array(MAX_POINTS).fill(null);
+    let currentPointIndex = 0;
+
+    // --- 1. HISTORIAKAAVIO ---
+    const historyChart = new Chart(document.getElementById('historyChart'), {
+        type: 'line',
+        data: {
+            labels: historyLabels,
+            datasets: [{
+                label: 'Wattia',
+                data: historyData,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.05)',
+                fill: false,
+                tension: 0.1,
+                pointRadius: 0,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                x: {
+                    grid: {
+                        display: true,
+                        color: (ctx) => (ctx.index % GRID_STEP === 0 ? '#cccccc' : '#f0f0f0'),
+                        lineWidth: (ctx) => (ctx.index % GRID_STEP === 0 ? 1 : 0.5)
+                    },
+                    ticks: {
+                        callback: function(val, index) {
+                            return (index % GRID_STEP === 0) ? this.getLabelForValue(val) : '';
+                        },
+                        autoSkip: false,
+                        maxRotation: 0
+                    }
+                },
+                y: { beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // --- 2. TEHOPYLVÄÄT ---
+    const powerBarChart = new Chart(document.getElementById('powerBarChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Yhteensä', 'L1', 'L2', 'L3'],
+            datasets: [{ data: [0, 0, 0, 0], backgroundColor: '#3498db' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // --- 3. VIRTAPYLVÄÄT ---
+    const currentBarChart = new Chart(document.getElementById('currentBarChart'), {
+        type: 'bar',
+        data: {
+            labels: ['L1', 'L2', 'L3'],
+            datasets: [{ data: [0, 0, 0], backgroundColor: '#2ecc71' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    async function update() {
+        try {
+            const res = await fetch(API_URL);
+            if (!res.ok) throw new Error("Yhteysvirhe");
+            const data = await res.json();
+            
+            const now = new Date();
+			const pvm = now.toLocaleDateString('fi-FI');
+            const klo = now.toLocaleTimeString('en-GB');
+
+			// Päivä, aika ja sähkömittarin lukema
+			document.getElementById('status').innerText = `Pvm: ${pvm} | Klo: ${klo} | Sähkömittarin lukema: ${Math.floor(data.ic).toString()} kWh`;
+
+            // Kirjurilogiikka historialle
+            if (currentPointIndex < MAX_POINTS) {
+                // Täytetään tyhjää tilaa alussa
+                historyChart.data.labels[currentPointIndex] = klo;
+                historyChart.data.datasets[0].data[currentPointIndex] = data.p[0];
+                currentPointIndex++;
+            } else {
+                // Rullataan vasemmalle kun täynnä
+                historyChart.data.labels.shift();
+                historyChart.data.labels.push(klo);
+                historyChart.data.datasets[0].data.shift();
+                historyChart.data.datasets[0].data.push(data.p[0]);
+            }
+            historyChart.update('none');
+
+            // Päivitä pylväät
+			powerBarChart.data.datasets[0].data = [data.p[0], data.p[1], data.p[2], data.p[3]];
+            powerBarChart.update();
+
+            currentBarChart.data.datasets[0].data = [data.i[0], data.i[1], data.i[2]];
+            currentBarChart.update();
+
+        } catch (e) {
+            document.getElementById('status').innerText = "Virhe: " + e.message;
+            console.error(e);
+        }
+    }
+
+    // Luetaan 10s välein
+    setInterval(update, 10000);
+    update();
+</script>
+</body>
+</html>
