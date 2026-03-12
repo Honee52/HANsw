@@ -2,23 +2,23 @@ HANsw - versiohistoria.
 =========================
 Versio:     1.0.0 Build 0
 Pvm:        12.03.2026
-Muutettu:	Päivityksiä ohjelman ulkonäköön.
-Korjattu:	Tehokäyräikkunan päivitysongelma.
+Muutettu:	Päivityksiä ohjelman ulkonäköön
+Korjattu:	Tehokäyräikkunan päivitysongelma
 Versio:		Julkaisuversio (release)
 
 Versio:     0.0.3 Build 0, beta-versio
 Pvm:        09.03.2026
-Muutettu:	Päivityksiä (minor) ohjelman toimintaan.
+Muutettu:	Päivityksiä (minor) ohjelman toimintaan
 
 Versio:     0.0.2 Build 0, beta-versio
 Pvm:        05.03.2026
-Lisätty:   	Tehokäyrän näyttö.
-			- Jänniteskaalaus 1kW/jako, 2kW/jako, 5kW/jako ja 10kW/jako.
-			- Aikaskaala 5 minuuttia/jako.
-			- Jännitetieto päivityy 10 sekunnin välein.
-			- Mittaukset näyttö, hetkelliset arvot: teho sekä vaiheiden L1, L2 ja L3 virrat.
+Lisätty:   	Tehokäyrän näyttö
+			- Jänniteskaalaus 1kW/jako, 2kW/jako, 5kW/jako ja 10kW/jako
+			- Aikaskaala 5 minuuttia/jako
+			- Jännitetieto päivityy 10 sekunnin välein
+			- Mittaukset näyttö, hetkelliset arvot: teho sekä vaiheiden L1, L2 ja L3 virrat
 Muutettu:	Asetusten syöttö.
 			
 Versio:     0.0.1 Build 0, beta-versio
 Pvm:        25.02.2026
-Tila:   	Ohjelman ensimmäinen versio.
+Tila:   	Ohjelman ensimmäinen versio
