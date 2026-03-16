@@ -1,5 +1,9 @@
 HANsw - versiohistoria.
 =========================
+Versio:     1.0.0 Build 1
+Pvm:        16.03.2026
+Korjattu:	Ajan näyttö
+
 Versio:     1.0.0 Build 0
 Pvm:        12.03.2026
 Muutettu:	Päivityksiä ohjelman ulkonäköön
